@@ -89,3 +89,53 @@ String textBlock = """
 ```
 
 - 들여쓰기의 기준선은 문자와 닫히는 `"""` 의 가장 왼쪽
+
+---
+### Switch Expression
+- 자바 12 preview, 자바 14 정식 기능
+- switch 문이 결과 값을 가지게 됨
+```java
+private String calculateGradeAfter(int score) {  
+    return switch (score) {  
+        case 5:  
+            yield "A";  
+        case 4, 3:  
+            yield "B";  
+        case 2, 1:  
+            yield "C";  
+        default:  
+            yield "F";  
+    };  
+}
+```
+- 반드시 최종 결과가 하나의 값으로 만들어져야 한다.(예외 가능)
+- `Enum` 과 사용하기 좋다. (`default` 가 필요 없음)
+- `yield` 키워드를 통해 반환한 값을 지정
+- colon case label(`:`) 과 `yield` 를 함께 사용
+- arrow case label(`->`)  을 통해 `yield` 생략 가능
+	- `{}` 사용시에는 `yield` 필수
+```java
+private String calculateGradeAfter(int score) {  
+    return switch (score) {  
+        case 5 -> "A";  
+        case 4, 3 -> "B";  
+        case 2, 1 -> "C";  
+        default -> "F";  
+    };  
+}
+```
+
+---
+### instanceof Pattern Matching
+- 자바 14 preview, 자바 16 정식 기능
+- `instanceof`: 어떤 변수가 특정 타입의 인스턴스인지 확인
+```java
+if (animal instanceof Dog dog) {  
+    return dog.bark();  
+} else if (animal instanceof Cat cat) {  
+    return cat.purr();  
+}
+```
+- `instanceof` pattern matching 을 사용하여 특정 타입을 확인 후 형 변환된 값을 할당 
+
+---
