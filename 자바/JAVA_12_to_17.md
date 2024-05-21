@@ -139,3 +139,76 @@ if (animal instanceof Dog dog) {
 - `instanceof` pattern matching 을 사용하여 특정 타입을 확인 후 형 변환된 값을 할당 
 
 ---
+### Record Class
+- 자바 14 preview, 자바 16 정식기능
+- 데이터 전달을 위한 클래스(Dto)
+```java
+public record FruitDtoV2(  
+        // 필드(컴포넌트)
+        String name,  
+        int price,  
+        LocalDate date  
+) {  
+}
+```
+- 다른 클래스가 `record` `class` 를 상속 불가능
+- 컴포넌트에 대한 `private` `final` 필드가 자동 생성
+- 필드에 값을 할당하는 생성자 자동 생성
+- 필드에 접근할 수 있는 접근자(`getter`) 자동 생성
+- `equals()`,` hashCode()`, `toString()` 자동 생성
+#### 특징
+- 다른 클래스를 상속 불가능
+- 인터페이스 구현 가능
+- `static` 필드, 함수, 인스턴스 함수 등 생성 가능
+- 인스턴스 필드 생성 불가능
+- 자동 생성되는 메소드들의 재정의 가능
+- `compact constructor`
+	- 자동 생성된 생성자 안으로 추가 작업 정의 가능
+	- 매개변수를 받지 않음
+	- 필드에 값을 할당 할 수 없음
+```java
+// compact constructor  
+public FruitDtoV2 {  
+    System.out.println("생성자 호출!!");  
+    if (price < 0 ) {  
+        throw new IllegalArgumentException("과일의 가격은 양수 입니다.");  
+    }  
+}
+```
+- 컴포넌트에 어노테이션을 작성할 경우 클래스 안의 필드, 생성자의 매개변수, 필드에 접근하는 메소드 모두에 어노테이션을 작성한 것과 같다.
+	- 특정 요소에 강제하려면 `@Target` 메타 어노테이션 활용
+- `Jackson 2.12.0` 이상에서 사용 가능(Spring Boot 2.5.x 이상)
+
+---
+### Sealed Class / Interface
+- 자바 15 preview, 자바 17 정식 기능
+- 하위 클래스를 지정된 클래스로만 제한
+- 추상 클래스나 인터페이스를 만들 때 하위 클래스를 제한하고 싶을 때 사용
+```java
+public sealed abstract class Animal permits Dog, Cat {  
+}
+
+public final class Cat extends Animal {  
+  
+    public String purr() {  
+        return "고양이 야옹~";  
+    }  
+}
+
+public final class Dog extends Animal {  
+  
+    public String bark() {  
+        return "강아지 멍멍";  
+    }  
+}
+```
+- 상위 클래스에 `sealed` 키워드를 작성하고 `permits` 키워드로 하위 클래스를 지정
+- 하위 클래스에는 `final`, `sealed`, `non-sealed` 셋 중 하나의 키워드를 작성
+	- `final` : 재상속 불가능
+	- `sealed` : 상속 가능, sealed class 이므로 하위 클래스 지정
+	- `non-sealed` : 상속 가능, 하위타입 추적 불가능
+- `named module` 인 경우는 부모와 같은 모듈에 있어야 함.
+- `unnamed module` 인 경우는 부모와 같은 패키지에 있어야 함.
+- 한 파일에 부모와 자식 모두 있다면 `permits` 키워드 생략 가능
+
+---
