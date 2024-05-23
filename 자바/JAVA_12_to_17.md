@@ -212,3 +212,130 @@ public final class Dog extends Animal {
 - 한 파일에 부모와 자식 모두 있다면 `permits` 키워드 생략 가능
 
 ---
+### String / Flies 클래스 API
+
+#### indent
+- 문자열의 각 줄마다 들여쓰기
+- 음수를 넣으면 가장 왼쪽 공백 제거
+```java
+String str = """  
+        A
+        BC
+        DEF
+        """.indent(3);
+
+/*
+   A
+   BC
+   DEF
+*/
+```
+
+#### stripIndent
+- Text Block 의 왼쪽으로 붙여쓰기
+```java
+String str = "  A\n  B\n C";
+
+/*
+ A
+ B
+C
+*/
+```
+
+#### formatted
+- String.format() 동일
+```java
+String str = "Hello, %s".formatted("bobby");
+```
+
+#### mismatch
+- 두 파일의 내용물이 같은지 다른지 확인
+- 내용이 다른 경우 첫 번째로 다른 부분의 index 반환
+- 내용이 같은 경우 -1 반환
+
+---
+### Collectors / Stream 클래스 API
+
+#### teeing
+- 첫 번째 Collector 와 두 번째 Collector 의 합쳐진 결과를 처리
+```java
+fruits.stream()  
+        .collect(Collectors.teeing(  
+                Collectors.minBy(Comparator.comparingInt(Fruit::price)),  
+                Collectors.maxBy(Comparator.comparingInt(Fruit::price)),  
+                (f1, f2) -> {  
+                    f1.ifPresent(f -> System.out.printf("가장 싼 과일은 %s 입니다.\n", f.name()));  
+                    f1.ifPresent(f -> System.out.printf("가장 비싼 과일은 %s 입니다.\n", f.name()));  
+                    return 0; 
+                }  
+        ));
+```
+
+#### toList
+- list 로 쉽게 collect
+```java
+List<Integer> result = nums.stream()
+		.filter(num -> num % 2 == 0)
+		.toList();
+```
+
+#### mapMulti
+- flatMap() 을 조금 더 효율적으로 사용하면서 동시에 filter, map 연산도 가능
+- 선언형 -> 명령형
+```java
+List<List<Number>> nums = List.of(List.of(1.0, 2.0), List.of(3, 4, 5));   
+  
+List<Double> result = nums.stream()  
+        .<Double>mapMulti((list, consumer) -> {  
+            for (Number num : list) {  
+                if (num instanceof Double) {  
+                    consumer.accept((double) num); // 조건에 해당하지 않으면 호출 X 
+                }  
+            }  
+        })  
+        .toList();
+```
+
+---
+### Random API
+- 기존의 `Random` 클래스 상위에 `RandomGenerator` 인터페이스 추가
+	- 추가적인 랜덤 구현체 추가
+	- thread-safe 하지는 않지만 기존 랜덤 함수보다 성능좋음
+- `RandomGeneratorFactory` 추가
+
+---
+### Helpful NPE 
+- 보다 정확한 에러 메시지를 이용해 Null 을 특정
+```java
+boolean isBlank = user.name().isBlank();
+
+/*
+Cannot invoke "String.isBlank()" because the return value of "npe.Main$User.name()" is null
+	at npe.Main.main(Main.java:8)
+*/
+```
+
+---
+### LTS 주기 변경
+- 3년 -> 2년
+	- 2021년 9월 자바17(LTS)
+	- 2023년 9월 자바21(LTS)
+
+---
+### 새로운 패키징 툴
+- 자바 16, `jpackage` 
+- `.jar` 파일을 설치할 수 있도록 변환
+- `java se` 모듈이 패키징 되어 있어 패키징 된 `.jar` 를 설치 할 때 jav`a 설치 필요 X
+
+---
+### ZGC
+- 자바 15에서 정식 GC 중 하나로 등록
+- default GC 는 `G1GC` 
+- `ZGC` 를 사용하려면 `-XX:+UseZGC` 옵션 필요
+
+---
+### Socket API 재구현
+- `Project Loom`(자바 21의 가상 스레드) 을 위한 재구현
+
+---
