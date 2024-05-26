@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "자바/JAVA_12_to_17.md",
+                "file": "자바/JAVA_18_to_21.md",
                 "mode": "source",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "자바/JAVA_12_to_17.md",
+                "file": "자바/JAVA_18_to_21.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "자바/JAVA_12_to_17.md",
+                "file": "자바/JAVA_18_to_21.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "자바/JAVA_12_to_17.md"
+                "file": "자바/JAVA_18_to_21.md"
               }
             }
           }
@@ -148,8 +148,9 @@
   },
   "active": "e46a53aec80501c1",
   "lastOpenFiles": [
-    "자바/JAVA_11.md",
     "자바/JAVA_12_to_17.md",
+    "자바/JAVA_18_to_21.md",
+    "자바/JAVA_11.md",
     "자바/JAVA_9.md",
     "자바/JAVA_10.md",
     "MySQL/트랜잭션.md",
