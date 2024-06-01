@@ -150,4 +150,62 @@ public static boolean isExtendedPictographic(int codePoint)
 - `SortedMap` : Entry 추가 호출 시 `UnsupportedOperationException` 발생
 
 ---
+### Virtual Thread
+- 높은 처리량의 동시성 애플리케이션을 위한 경량 쓰레드
+- `platform thread`(JVM 의 thread) 는 `native thread`(OS 가 관리하는 thread) 와 1:1 매핑
+- `virtual thread` 는 `platform thread` 와 N:1 매핑이 가능
+	- `mount` : `virtual thread` 가 `platform thread` 에 매핑되는 과정
+	- `unmount` : `virtual thread` 가 `platform thread` 에 해제 과정
+- Java Runtime 내부의 스케쥴러가 매핑을 결정
+- 실행되고 있던 가상 스레드가 blocking 되면 다른 가상 스레드로 변경 
+```java
+// virtual thread 생성
+Thread t = Thread.ofVirtual()  
+        .start(() -> printlnWithThread("Hello World"));  
+  
+Thread t = Thread.startVirtualThread(() -> printlnWithThread("Hello World!"));
 
+// executor service 활용
+try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {  
+    executor.submit(() -> printlnWithThread("Hello World!!"));    
+}
+```
+
+- 가상 스레드가 플랫폼 스레드보다 코드를 더 빨리 실행 시키지 않는다.
+- 여러 요청을 동시에 처리해 전체 처리량을 늘린다.
+- 단일 요청을 놓고 보면 플랫폼 스레드보다 느릴 수 있다.
+- 가상 스레드는 생성 비용이 저렴하기 때문에 풀링(pool) 방식이 권장 되지 않는다.
+#### Virtual Thread + Spring MVC
+- spring boot 3.2 부터 지원(Java 21 이상)
+```yaml
+spring:
+  threads:
+    virtual:
+      enable: true
+```
+- 해당 옵션 사용 시 톰캣, 스케줄러, @Async, RabbitMQ / Kafka 리스너 등 모두 가상 스레드 사용
+- 풀링을 사용하지 않으므로 DB 커넥션 풀이 소진되어 요청이 거절 될 수 있다.
+
+> 가상 쓰레드 Pinning 현상
+> - 가상 스레드가 특정 플랫폼 스레드에 고정되어 다른 가상 스레드를 실행 시킬 수 없는 현상
+> - `synchronized` 코드를 실행 하거나 `native` 코드를 실행한 경우 발생할 수 있다.
+
+> ThreadLocal 문제
+> - 풀링 방식에서는 스레드에 비싼 객체를 캐싱
+> - 가상 스레드에도 동일한 방법을 적용하면 성능에 악영향
+
+#### Virtual Thread + Spring Webflux
+- `webflux` : `thread-per-request` 스타일에서 벗어나 적은 수의 `thread`, `non-blocking API` 로 동시성 극대화
+- 적은 수의 스레드가 풀링되고 있어 가상 스레드를 바로 적용하기 애매
+
+#### 코루틴 vs 가상스레드
+
+|                | 코루틴                                                                                                    | 가상 스레드                                               |
+| -------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
+|                | - Blocking I/O 를 만나면 다른 코루틴 실행 X, 점유하고 있는 스레드가 block 된다<br>- 코루틴의 실행을 멈추고 다른 코루틴을 실행시키려면 suspend 함수 사용 | - Blocking I/O 를 만나면 다른 가상 스레드 실행                    |
+| 목적             | 비동기 프로그래밍을 동기식 처럼 작성                                                                                   | 기존 Thread 와 호환성을 유지하며 thread-per-request H/W 사용량 극대화 |
+| Learning Curve | 코틀린 / 코루틴 라이브러리 학습 필요                                                                                  | -                                                    |
+| 활용             | CoroutinContext / CorutinScope                                                                         | Scoped Value / StructuredTaskScope                   |
+| 호환성            | Spring Webflux 와 적극적으로 호환                                                                              | - java.lang.Thread 와의 호환성 뛰어남<br>- 프레임워크 호환성은 발전중    |
+
+---
